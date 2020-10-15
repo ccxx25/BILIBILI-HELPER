@@ -18,4 +18,14 @@ public class API {
     public static String silver2coin = "https://api.live.bilibili.com/pay/v1/Exchange/silver2coin";
     //状态
     public static String getSilver2coinStatus = "https://api.live.bilibili.com/pay/v1/Exchange/getStatus";
+
+    public static String videoHeartbeat = "http://api.bilibili.com/x/click-interface/web/heartbeat";
+
+    public static String getCoinBalance = "https://account.bilibili.com/site/getCoin";//查询主站硬币数量
+
+    public static String autoCharge = "http://api.bilibili.com/x/ugcpay/trade/elec/pay/quick";
+
+    public static String chargeComment = "http://api.bilibili.com/x/ugcpay/trade/elec/message";
+
+    public static String vipPrivilegeReceive = "https://api.bilibili.com/x/vip/privilege/receive";
 }

@@ -20,7 +20,6 @@
 *.rar
 
 # IDEA
-##----------idea----------
 *.iml
 .idea/
 *.ipr
