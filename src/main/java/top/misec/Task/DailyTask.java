@@ -265,8 +265,19 @@ public class DailyTask implements ExpTask {
 
     }
 
-    public boolean query_isVip() {
-        return userInfo.getVipStatus() == 1;
+    /**
+     * @return 返回会员类型
+     * 0：无会员（会员过期，当前不是会员）
+     * 1：月会员
+     * 2：年会员
+     */
+    public int query_vipStatusType() {
+        if (userInfo.getVipStatus() == 1) {
+            return userInfo.getVipType();
+        } else {
+            return 0;
+        }
+
     }
 
 
@@ -277,18 +288,19 @@ public class DailyTask implements ExpTask {
         Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT+8"));
         int day = cal.get(Calendar.DATE);
         int coupon_balance = userInfo.getWallet().getCoupon_balance();
+        int vip_type = query_vipStatusType();
 
-        if (day == 1 && query_isVip()) {
+        if (day == 1 && vip_type == 2) {
             oftenAPI.vipPrivilege(1);
             oftenAPI.vipPrivilege(2);
         }
         String userId = Verify.getInstance().getUserId();//被充电用户的userID
         /*
-               月底，要是VIP，并且b币券余额大于2，配置项允许自动充电
+               月底，要是年大会员，并且b币券余额大于2，配置项允许自动充电
          */
         if (day == 28 && coupon_balance >= 2 &&
                 Config.getInstance().getMonth_end_auto_charge() == 1 &&
-                query_isVip()) {
+                vip_type == 2) {
             String requestBody = "elec_num=" + coupon_balance * 10
                     + "&up_mid=" + userId
                     + "&otype=up"
@@ -329,16 +341,58 @@ public class DailyTask implements ExpTask {
 
     }
 
+    /**
+     * 获取大会员漫画权益
+     *
+     * @param reason_id 权益号，由https://api.bilibili.com/x/vip/privilege/my
+     *                  得到权益号数组，取值范围为数组中的整数
+     *                  为方便直接取1，为领取漫读劵，暂时不取其他的值
+     * @return 返回领取结果和数量
+     */
+    public void mangaGetVipReward(int reason_id) {
 
-    public void doDailyTask() {
-        userInfo = new Gson().fromJson(HttpUnit.Get(API.LOGIN)
-                .getAsJsonObject("data"), Data.class);
+        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT+8"));
+        int day = cal.get(Calendar.DATE);
 
-        if (userInfo == null) {
-            logger.info("-----Cookies可能失效了-----");
+        //@happy888888: query_isVip貌似不能判断会员类型，上上面的charge函数应该做userInfo.getVipType()的判断，这里不需要
+        //@JunzhouLiu: query_isVip是可以做是否VIP判断的 根据userInfo.getVipStatus() ,如果是1 ，会员有效，0会员失效。
+        //@JunzhouLiu: fixed query_vipStatusType()现在可以查询会员状态，以及会员类型了 2020-10-15
+        if (day != 1 || query_vipStatusType() != 0) {
+            //是会员就可以领取
+            //一个月执行一次就行，跟几号没关系，由B站策略决定(有可能改领取时间)
+            return;
         }
 
-        logger.info("----用户名称: " + userInfo.getUname());
+        String requestBody = "{\"reason_id\":" + reason_id + "}";
+        //注意参数构造格式为json，不知道需不需要重载下面的Post函数改请求头
+        JsonObject jsonObject = HttpUnit.Post(API.mangaGetVipReward, requestBody);
+        if (jsonObject.get("code").getAsInt() == 0) {
+            //@happy888888:好像也可以getAsString或,getAsShort
+            //@JunzhouLiu:Int比较好判断
+            logger.info("大会员成功领取" + jsonObject.get("data").getAsJsonObject().get("amount").getAsInt() + "张漫读劵");
+        } else {
+            logger.info("大会员领取漫读劵失败，原因为：" + jsonObject.get("msg").getAsString());
+        }
+        logger.debug(jsonObject);
+    }
+
+    public void doDailyTask() {
+
+        JsonObject userJson = null;
+        userJson = HttpUnit.Get(API.LOGIN);
+
+        if (userJson == null) {
+            logger.info("-----Cookies可能失效了-----");
+            //@happy88888: 失效上面好像就抛出JsonParseException异常了，这里执行得到吗.......
+            //@JunzhouLiu: fixed 2020-10-15
+        } else {
+            userInfo = new Gson().fromJson(userJson
+                    .getAsJsonObject("data"), Data.class);
+        }
+
+        String uname = userInfo.getUname();
+        int s1 = uname.length() / 2, s2 = (s1 + 1) / 2;
+        logger.info("----用户名称: " + uname.substring(0, s2) + String.join("", Collections.nCopies(s1, "*")) + uname.substring(s1 + s2));
         logger.info("----登录成功 经验+5----");
         logger.info("----硬币余额: " + userInfo.getMoney());
         logger.info("----距离升级到Lv" + (userInfo.getLevel_info().getCurrent_level() + 1) + "----: " +
@@ -350,9 +404,7 @@ public class DailyTask implements ExpTask {
         silver2coin();//银瓜子换硬币
         doCoinAdd();//投币任务
         charge();
+        mangaGetVipReward(1);
     }
-
 }
-
-
 

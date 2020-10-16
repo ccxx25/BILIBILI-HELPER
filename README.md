@@ -14,12 +14,12 @@ BILIBILI-HELPER
 
 这是一个利用GitHub Action定时任务实现哔哩哔哩（Bilibili）每日自动投币，点赞，分享视频，直播签到，银瓜子兑换硬币，漫画每日签到，简单配置即可每日轻松获取65经验值，快来和我一起成为Lv6吧~~~~ 
 
-**仓库地址: [JunzhouLiu/BILIBILI-HELPER](https://github.com/JunzhouLiu/BILIBILI-HELPER)** 
+**如果觉得好用，顺手点个Star吧 ❤**
 
-**如果觉得好用，顺手点个Star吧**
+**仓库地址:[JunzhouLiu/BILIBILI-HELPER](https://github.com/JunzhouLiu/BILIBILI-HELPER)**
 
 ## 功能列表
-* [x] 每天上午10点30自动自动登录。
+* [x] 每天上午8点30自动开始任务。
 * [x] 哔哩哔哩漫画每日自动签到 。
 * [x] 每日自动从热门视频中随机观看1个视频，并分享 10经验 
 * [x] 每日从热门视频中选取5个进行智能投币 *【如果投币不能获得经验，默认不投币】*
@@ -69,7 +69,9 @@ BILIBILI-HELPER
 
 4. **手动开GitHub Action服务**
    
-Github Actions默认处于禁止状态，请手动开启Actions. 之后每天10点半会运行一次。 
+Github Actions默认处于禁止状态，请手动开启Actions. 之后每天10点半会运行一次。
+
+本工具的Actions自动构建配置了缓存，平均运行时间在`20s`左右。~~`Github Actions`每月的免费额度有2000分钟。所以本工具执行一个月（30次）的定时任务，大约会使用12分钟左右的免费额度，不到`0.6%`大家可以放心使用。公开仓库的Actions不计时 嘤嘤嘤~~
 
 *如果收到了GitHub Action的错误邮件，请检查Cookies是不是失效了，用户主动清除浏览器缓存，会导致`BILI_JCT`和`DEDEUSERID`失效*
 
@@ -119,7 +121,7 @@ on:
   workflow_dispatch:
   schedule:
     - cron: 0 16 * * fri
-    # cron表达式,每周五16点执行一次，可按照需求自定义。  
+    # cron表达式,每周五16点执行一次，时区为Asia/Shanghai可按照需求自定义。  
 
 jobs:
   merge:
@@ -153,6 +155,7 @@ jobs:
     - name: Push Commits
       env:
         DOWNSTREAM_BRANCH: main
+        TZ: Asia/Shanghai
       run: git push origin $DOWNSTREAM_BRANCH
 ```
 
