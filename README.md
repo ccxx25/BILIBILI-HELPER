@@ -7,7 +7,10 @@ BILIBILI-HELPER
 [![GitHub forks](https://img.shields.io/github/forks/JunzhouLiu/BILIBILI-HELPER?style=flat-square)](https://github.com/JunzhouLiu/BILIBILI-HELPER/network)
 [![GitHub issues](https://img.shields.io/github/issues/JunzhouLiu/BILIBILI-HELPER?style=flat-square)](https://github.com/JunzhouLiu/BILIBILI-HELPER/issues)
 [![GitHub license](https://img.shields.io/github/license/JunzhouLiu/BILIBILI-HELPER?style=flat-square)](https://github.com/JunzhouLiu/BILIBILI-HELPER/blob/main/LICENSE) 
- 
+[![GitHub All Releases](https://img.shields.io/github/downloads/JunzhouLiu/BILIBILI-HELPER/total?style=flat-square)](https://github.com/JunzhouLiu/BILIBILI-HELPER/releases)
+[![GitHub contributors](https://img.shields.io/github/contributors/JunzhouLiu/BILIBILI-HELPER?style=flat-square)](https://github.com/JunzhouLiu/BILIBILI-HELPER/graphs/contributors)
+![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/JunzhouLiu/BILIBILI-HELPER?style=flat-square)
+
 </div>
 
 # 工具简介 
@@ -27,18 +30,24 @@ BILIBILI-HELPER
 * [x] 大会员月底使用快到期的B币券，给自己充电，一点也不会浪费哦，默认开启。*【可配置】*
 * [x] 大会员月初1号自动领取每月5张B币券和福利。
 
-[快速使用](#使用前准备)
-[点击查看如何自定义上述功能](#自定义功能)
 ......
+
+[点击快速开始使用](#快速开始使用)
+
 
 # 目录
 - [工具简介](#工具简介)
   - [功能列表](#功能列表)
 - [目录](#目录)
 - [使用说明](#使用说明)
-  - [快速开始使用](#快速开始使用)
-  - [配置自定义功能](#配置自定义功能)
-  - [查看运行日志](#查看运行日志)
+  - [一、Actions定时任务（推荐）](#一actions定时任务推荐)
+    - [配置自定义功能](#配置自定义功能)
+    - [查看运行日志](#查看运行日志)
+  - [二、使用Luinx crontab方式](#二使用luinx-crontab方式)
+    - [步骤](#步骤)
+    - [运行效果](#运行效果)
+  - [三、使用Windows10](#三使用windows10)
+    - [步骤](#步骤-1)
 - [快速更新](#快速更新)
   - [关于项目更新频率](#关于项目更新频率)
   - [使用Github Actions 自动同步源仓库代码](#使用github-actions-自动同步源仓库代码)
@@ -48,7 +57,7 @@ BILIBILI-HELPER
 
 
 # 使用说明
-## 快速开始使用
+## 一、Actions定时任务（推荐）
 1. **fork本项目，功能正在逐步增加中，要是能顺手点个Star就更好了**
 2. **获取Bilibili Cookies**
 - 浏览器打开并登录[bilibili网站](https://www.bilibili.com/)
@@ -61,37 +70,40 @@ BILIBILI-HELPER
    
 | Name       | Value              |
 | ---------- | ------------------ |
-| BILI_JCT   | 从浏览器缓存中获取 |
-| DEDEUSERID | 从浏览器缓存中获取 |
-| SESSDATA   | 从浏览器缓存中获取 |
+| BILI_JCT   | 从Cookie中获取 |
+| DEDEUSERID | 从Cookie中获取 |
+| SESSDATA   | 从Cookie中获取 |
 
 ![图示](docs/IMG/20201013210000.png)
 
 4. **手动开GitHub Action服务**
    
-Github Actions默认处于禁止状态，请手动开启Actions. 之后每天10点半会运行一次。
+Github Actions默认处于禁止状态，请手动开启Actions. 之后每天8点30会运行一次。
+
+![图示](docs/IMG/openActions.png)
 
 本工具的Actions自动构建配置了缓存，平均运行时间在`20s`左右。~~`Github Actions`每月的免费额度有2000分钟。所以本工具执行一个月（30次）的定时任务，大约会使用12分钟左右的免费额度，不到`0.6%`大家可以放心使用。公开仓库的Actions不计时 嘤嘤嘤~~
 
 *如果收到了GitHub Action的错误邮件，请检查Cookies是不是失效了，用户主动清除浏览器缓存，会导致`BILI_JCT`和`DEDEUSERID`失效*
 
-![图示](docs/IMG/openActions.png)
 
-## 配置自定义功能
+### 配置自定义功能
 
 **配置文件位于`src/main/resources/config.json`**
 
 参数示意
-| Key                   | Value | 说明                                                      |
-| --------------------- | ----- | --------------------------------------------------------- |
-| numberOfCoins         | 0到5  | 每日投币数量                                              |
-| select_like           | 1，0  | 1：投币时点赞，0：投币时不点赞                            |
-| watch_share           | 1，0  | 1：观看时分享，0：观看不分享                              |
-| month_end_auto_charge | 1，0  | 1：大会员月底如果有没用完的B币券自动充电，0：关闭月底充电 |
+
+| Key                | Value         | 说明                                                     |
+| ------------------ | ------------- | -------------------------------------------------------- |
+| numberOfCoins      | [0,5]         | 每日投币数量,默认5                                       |
+| selectLike         | [0,1]         | 投币时是否点赞，默认0, 0:否 1:是                         |
+| ~~watchAndShare~~  | ~~[0,1]~~     | ~~观看时是否分享~~                                       |
+| monthEndAutoCharge | [false,true]  | 年度大会员月底是否用B币券给自己充电，默认`true`          |
+| devicePlatform     | [ios,android] | 手机端漫画签到时的平台，建议选择你设备的平台 ，默认`ios` |
 
 *投币数量代码做了处理，如果本日投币不能获得经验了，则不会投币，每天只投能获得经验的硬币。假设你设置每日投币3个，早上7点你自己投了2个硬币，则十点半时，程序只会投1个）*
 
-## 查看运行日志 
+### 查看运行日志 
 
 *展开`Build With Maven`通过`DEBUG`标签快速过滤日志，查看运行状态*  
 
@@ -99,6 +111,41 @@ Github Actions默认处于禁止状态，请手动开启Actions. 之后每天10�
 
 ![图示](docs/IMG/debug1.png)
 ![图示](docs/IMG/debug2.png)
+
+
+## 二、使用Luinx crontab方式
+
+### 步骤
+点击[BILIBILI-HELPER/release](https://github.com/JunzhouLiu/BILIBILI-HELPER/releases)，下载已发布的版本，上传至Liunx服务器。
+
+1. `crontab -l`
+```bash
+root@iZuf642f8w148fwdcpq169Z:~# crontab -l
+.......
+# m h  dom mon dow   command
+0 0 1,15 * * /home/./acme.sh-master/acme.sh --renew-all >>/var/log/cron.log 2>&1 &
+0 0 1,15 * * nginx -s reload >>/var/log/cron.log 2>&1 &
+```
+2. `corntab -e`,编辑crontab任务，退出保存即可。后面跟的三个参数为哔哩哔哩Cookies参数。
+```bash
+# m h  dom mon dow   command
+0 0 1,15 * * /home/./acme.sh-master/acme.sh --renew-all >>/var/log/cron.log 2>&1 &
+0 0 1,15 * * nginx -s reload >>/var/log/cron.log 2>&1 &
+java -jar /home/BILIBILI-HELP.jar userId sessData biliJct 
+```
+
+### 运行效果  
+![图示](docs/IMG/liunxImg.png)
+
+
+## 三、使用Windows10
+### 步骤
+1. 点击[BILIBILI-HELPER/release](https://github.com/JunzhouLiu/BILIBILI-HELPER/releases)，下载已发布的版本。在Jar包目录打开`Powershell` 需要装有Java运行环境
+   
+2. 执行`java -jar /home/BILIBILI-HELP.jar userId sessData biliJct `
+
+![图示](docs/IMG/powershell.png)
+
 
 # 快速更新
 
@@ -120,8 +167,8 @@ name: auto_merge
 on:
   workflow_dispatch:
   schedule:
-    - cron: 0 16 * * fri
-    # cron表达式,每周五16点执行一次，时区为Asia/Shanghai可按照需求自定义。  
+    - cron: 0 2 * * fri
+    # cron表达式,每周五10点执行一次，UTC时间，使用北京时间请+8可按照需求自定义。  
 
 jobs:
   merge:
