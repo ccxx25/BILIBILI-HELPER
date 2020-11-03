@@ -11,7 +11,7 @@ on:
   workflow_dispatch:
   schedule:
     - cron: '10 1 * * *'
-    # UTC 时间 “分钟 小时 日 月 周” 北京时间减去 8 小时即 UTC
+    # cron表达式，Actions时区是UTC时间，所以上午9点要往前推8个小时
 
 
 jobs:
