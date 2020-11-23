@@ -41,9 +41,9 @@ BILIBILI-HELPER
 * [x] Linux用户支持自定义配置了。
 * [x] 投币策略更新可配置投币喜好。*【可配置优先给关注的up投币】*
   
-......
+[点此查看更新日志](https://github.com/JunzhouLiu/BILIBILI-HELPER/blob/main/SECURITY.md)
 
-[点击快速开始使用](#快速开始使用)
+[点击快速开始使用](#使用说明)
 
 # 目录
 
@@ -59,6 +59,7 @@ BILIBILI-HELPER
     - [运行效果](#运行效果)
   - [三、使用 Windows10](#三使用-windows10)
     - [步骤](#步骤-1)
+  - [四、使用 Docker](#四使用-docker)
 - [微信订阅通知](#微信订阅通知)
   - [订阅执行结果](#订阅执行结果)
   - [订阅版本更新](#订阅版本更新)
@@ -69,6 +70,7 @@ BILIBILI-HELPER
 - [捐赠/赞赏](#捐赠赞赏)
 - [致谢](#致谢)
 - [API 参考列表](#api-参考列表)
+- [基于本项目的衍生项目](#基于本项目的衍生项目)
 
 # 使用说明
 
@@ -130,14 +132,24 @@ BILIBILI-HELPER
 
 参数示意
 
-| Key                | Value         | 说明                                                      |
-| ------------------ | ------------- | --------------------------------------------------------- |
-| numberOfCoins      | [0,5]         | 每日投币数量,默认 5                                       |
-| selectLike         | [0,1]         | 投币时是否点赞，默认 0, 0：否 1：是                       |
-| ~~watchAndShare~~  | ~~[0,1]~~     | ~~观看时是否分享~~                                        |
-| monthEndAutoCharge | [false,true]  | 年度大会员月底是否用 B币券 给自己充电，默认 `true`        |
-| devicePlatform     | [ios,android] | 手机端漫画签到时的平台，建议选择你设备的平台 ，默认 `ios` |
-| coinAddPriority    | [0,1]         | 0：优先给热榜视频投币，1：优先给关注的up投币              |
+| Key                | Value         | 说明                                                                                                          |
+| ------------------ | ------------- | ------------------------------------------------------------------------------------------------------------- |
+| numberOfCoins      | [0,5]         | 每日投币数量,默认 5                                                                                           |
+| selectLike         | [0,1]         | 投币时是否点赞，默认 0, 0：否 1：是                                                                           |
+| ~~watchAndShare~~  | ~~[0,1]~~     | ~~观看时是否分享~~                                                                                            |
+| monthEndAutoCharge | [false,true]  | 年度大会员月底是否用 B币券 给自己充电，默认 `true`                                                            |
+| devicePlatform     | [ios,android] | 手机端漫画签到时的平台，建议选择你设备的平台 ，默认 `ios`                                                     |
+| coinAddPriority    | [0,1]         | 0：优先给热榜视频投币，1：优先给关注的up投币                                                                  |
+| userAgent          | 浏览器UA      | 用户可根据部署平台配置，可根据userAgent参数列表自由选取，如果触发了HTTP/1.1 412 Precondition Failed也请修改UA |
+
+userAgent可选参数列表
+| 平台      | 浏览器         | userAgent                                                                                                                           |
+| --------- | -------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Windows10 | EDGE(chromium) | Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.198 Safari/537.36 Edg/86.0.622.69 |
+| Windows10 | Chrome         | Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.198 Safari/537.36                 |
+| masOS     | safari         | Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Safari/605.1.15               |
+| macOS     | Firefox        | Mozilla/5.0 (Macintosh; Intel Mac OS X 10.12; rv:65.0) Gecko/20100101 Firefox/65.0                                                  |
+| macOS     | Chrome         | Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.75 Safari/537.36            |
 
 *ps：如果尝试给关注的 up 投币十次后（保不准你关注的是年更up主），还没完成每日投币任务，则切换成热榜模式，给热榜视频投币*
 
@@ -170,6 +182,29 @@ BILIBILI-HELPER.jar
 config.json
 ```
 
+除此之外，也可以通过点击 [BILIBILI-HELPER/release](https://github.com/JunzhouLiu/BILIBILI-HELPER/releases)，下载已发布的版本，解压后将jar包手动上传到Linux服务器，使用crontab完成定时执行。
+
+**命令格式解释：**
+
+`30 10 * * * java -jar /home/BILIBILI-HELP.jar DEDEUSERID SESSDATA BILI_JCT SCKEY>/var/log/cron.log &`
+
+| args                               | 说明                                                                                                       |
+| ---------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| 30 10 * * *                        | cron 定时时间                                                                                              |
+| java -jar                          | 执行jar包                                                                                                  |
+| /home/BILIBILI-HELP.jar            | jar包路径                                                                                                  |
+| DEDEUSERID SESSDATA BILI_JCT SCKEY | 传入参数的顺序，参数含义请见上文,SCKEY可为空（用于server酱推送日志，等同actions任务配置中的SERVERPUSHKEY） |
+| >/var/log/cron.log &               | 日志写入的路径                                                                                             |
+
+
+**命令示例：**
+
+```shell
+# *如果Cookies参数中包含特殊字符，例如`%`请使用`\`转义*
+# m h  dom mon dow   command
+30 10 * * * java -jar /home/BILIBILI-HELP.jar DEDEUSERID SESSDATA BILI_JCT >/var/log/cron.log &
+```
+
 ### 运行效果
 
 ![图示](docs/IMG/liunxImg.png)
@@ -185,6 +220,14 @@ config.json
 1. 执行 `java -jar /home/BILIBILI-HELP.jar DEDEUSERID SESSDATA BILI_JCT `
 
 ![图示](docs/IMG/powershell.png)
+
+## 四、使用 Docker
+
+请自行参阅 [Issues/75#issuecomment-731705657](https://github.com/JunzhouLiu/BILIBILI-HELPER/issues/75#issuecomment-731705657) 和[基于本项目的衍生项目](#基于本项目的衍生项目) 。
+
+- **基于本项目的docker封装项目：[SuperNG6/docker-bilbili-helper](https://github.com/SuperNG6/docker-bilbili-helper)**
+
+- **基于本项目的docker镜像：[superng6/bilbili-helper](https://hub.docker.com/r/superng6/bilbili-helper)**
 
 # 微信订阅通知
 
@@ -233,3 +276,9 @@ config.json
 
 - [SocialSisterYi/bilibili-API-collect](https://github.com/SocialSisterYi/bilibili-API-collect)
 - [happy888888/BiliExp](https://github.com/happy888888/BiliExp)
+
+# 基于本项目的衍生项目
+
+- **基于本项目的docker封装项目：[SuperNG6/docker-bilbili-helper](https://github.com/SuperNG6/docker-bilbili-helper)**
+
+- **基于本项目的docker镜像：[superng6/bilbili-helper](https://hub.docker.com/r/superng6/bilbili-helper)**
